@@ -1,11 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 # Fredrik Boulund 2015
 # Sample sequences from a FASTA file 
 
 from read_fasta import read_fasta
 from sys import argv, exit, maxint
 import argparse
-from random import choice
+
+from numpy.random import choice
 
 
 def parse_args(argv):
@@ -24,6 +25,9 @@ def parse_args(argv):
     parser.add_argument("--minlength", metavar="m", type=int,
             default=0,
             help="Minimum length of sequences to sample from, 0 means no limit [%(default)s].")
+    parser.add_argument("--replace", dest="replace", action="store_true",
+            default=False,
+            help="Sample sequences with replacement [%(default)s].")
     parser.add_argument("-o", "--outfile", metavar="FILE", dest="outfile",
             default="",
             help="Write output to FILE instead of STDOUT.")
@@ -48,15 +52,16 @@ def sample_fasta(fastafile, outfile, options):
         if seqlen >= options.minlength and seqlen <= options.maxlength:
             seqs.append((header,seq))
 
+    chosen_samples = choice(len(seqs), size=options.n, replace=options.replace)
     if options.outfile:
         with open(outfile, 'w') as f:
-            for n in xrange(0,options.n):
-                header, seq = choice(seqs)
+            for index in chosen_samples:
+                header, seq = seqs[index]
                 f.write(">"+header+"\n")
                 f.write(seq+"\n")
     else:
-        for n in xrange(0,options.n):
-            header, seq = choice(seqs)
+        for index in chosen_samples:
+            header, seq = seqs[index]
             print ">"+header
             print seq
 
