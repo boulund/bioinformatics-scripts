@@ -40,20 +40,22 @@ def parse_args(argv):
     return options
 
 
-def sample_fasta(fastafile, outfile, options):
+def sample_fasta(fastafile, n, replacement=False, outfile="", maxlength=0, minlength=0):
     """Sample sequences from FASTA.
+
+    Will write to STDOUT if outfile evaluates to False.
     """
 
+    if not maxlength:
+        maxlength = maxint
     seqs = []
     for header, seq in read_fasta(fastafile):
         seqlen = len(seq)
-        if not options.maxlength:
-            options.maxlength = maxint
-        if seqlen >= options.minlength and seqlen <= options.maxlength:
+        if seqlen >= minlength and seqlen <= maxlength:
             seqs.append((header,seq))
 
-    chosen_samples = choice(len(seqs), size=options.n, replace=options.replace)
-    if options.outfile:
+    chosen_samples = choice(len(seqs), size=n, replace=replacement)
+    if outfile:
         with open(outfile, 'w') as f:
             for index in chosen_samples:
                 header, seq = seqs[index]
@@ -68,4 +70,9 @@ def sample_fasta(fastafile, outfile, options):
 
 if __name__ == "__main__":
     options = parse_args(argv)
-    sample_fasta(options.FASTA, options.outfile, options)
+    sample_fasta(options.FASTA, 
+                 options.N,
+                 options.replace,
+                 options.outfile, 
+                 options.maxlength,
+                 options.minlength)
