@@ -7,6 +7,7 @@ from FB_functions import read_fasta, format_fasta
 if len(argv) < 2:
     print "usage: script.py file.fasta 70"
     print "enter an integer to limit the rowlength of the output sequences"
+    exit()
 
 try:
     if argv[2] > 1:
