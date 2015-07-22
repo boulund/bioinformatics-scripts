@@ -13,7 +13,7 @@ def parse_args(argv):
 
     desc = """Extract sequences from FASTA files. Fredrik Boulund 2015"""
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument("FASTA", 
+    parser.add_argument("FASTA", nargs="+",
             help="FASTA file to sample from.")
     parser.add_argument("--maxlength", metavar="M", type=int,
             default=0,
@@ -33,7 +33,7 @@ def parse_args(argv):
     return options
 
 
-def extract_from_fasta(fastafile, outfile="", maxlength=0, minlength=0):
+def extract_from_fasta(fastafile, maxlength=0, minlength=0):
     """Extract sequences from FASTA.
 
     Will write to STDOUT if outfile evaluates to False.
@@ -44,22 +44,22 @@ def extract_from_fasta(fastafile, outfile="", maxlength=0, minlength=0):
 
     seqs = []
 
-    if outfile:
-        f = open(outfile, 'w')
-
     for header, seq in read_fasta(fastafile):
         seqlen = len(seq)
         if seqlen >= minlength and seqlen <= maxlength:
-            if outfile:
-                f.write(">"+header+"\n")
-                f.write(seq+"\n")
-            else:
-                print ">"+header
-                print seq
+            yield (">"+header, seq)
+
 
 if __name__ == "__main__":
     options = parse_args(argv)
-    extract_from_fasta(options.FASTA, 
-                       options.outfile, 
-                       options.maxlength,
-                       options.minlength)
+    if options.outfile:
+        with open(options.outfile, 'w') as outfile:
+            for filename in options.FASTA:
+                for seq in extract_from_fasta(filename, options.maxlength, options.minlength):
+                    outfile.write('\n'.join(seq)+"\n")
+    else:
+        for filename in options.FASTA:
+            for seq in extract_from_fasta(filename, options.maxlength, options.minlength):
+                print '\n'.join(seq)
+
+
