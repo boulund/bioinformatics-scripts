@@ -15,10 +15,10 @@ def parse_args(argv):
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument("FASTA", nargs="+",
             help="FASTA file(s) to sample from.")
-    parser.add_argument("--maxlength", metavar="M", type=int,
+    parser.add_argument("-M", "--maxlength", metavar="M", type=int,
             default=0,
             help="Maximum length of sequences to extract, 0 means no limit [%(default)s]")
-    parser.add_argument("--minlength", metavar="m", type=int,
+    parser.add_argument("-m", "--minlength", metavar="m", type=int,
             default=0,
             help="Minimum length of sequences to extract, 0 means no limit [%(default)s].")
     parser.add_argument("-o", "--outfile", metavar="FILE", dest="outfile",
