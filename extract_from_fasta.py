@@ -51,8 +51,7 @@ def extract_from_fasta(fastafile, maxlength=0, minlength=0, regexes=""):
 
     for header, seq in read_fasta(fastafile):
         if regexes:
-            hits = [re.match(rex, header) for rex in compiled_regexes]
-            if not any(hits):
+            if not any((re.search(rex, header) for rex in compiled_regexes)):
                 continue
         seqlen = len(seq)
         if seqlen >= minlength and seqlen <= maxlength:
