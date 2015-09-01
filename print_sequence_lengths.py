@@ -46,14 +46,14 @@ def read_fasta(filename, keep_formatting=True):
                 break
             elif line.startswith(">") and not first:
                 yield seqlen, header
-                header = line[1:]
+                header = line.rsplit()[1:]
                 seqlen = 0
             elif line.startswith(">") and first:
-                header = line[1:]
+                header = line.rsplit()[1:]
                 first = False
             else:
-                seqlen += len(line)
-            line = fasta.readline().rstrip()
+                seqlen += len(line.rsplit())
+            line = fasta.readline()
 
 
 
