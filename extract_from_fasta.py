@@ -46,9 +46,6 @@ def extract_from_fasta(fastafile, maxlength=0, minlength=0, regexes=""):
     Will write to STDOUT if outfile evaluates to False.
     """
 
-
-    seqs = []
-
     for header, seq in read_fasta(fastafile):
         if regexes:
             if not any((re.search(rex, header) for rex in compiled_regexes)):
@@ -71,6 +68,8 @@ if __name__ == "__main__":
     elif options.regex_file:
         with open(options.regex_file) as regexes:
             compiled_regexes = [re.compile(rex.strip()) for rex in regexes.readlines()]
+    else:
+        compiled_regexes = ""
 
     extraction_generators = (extract_from_fasta(filename, maxlength, options.minlength, compiled_regexes) for filename in options.FASTA)
 
