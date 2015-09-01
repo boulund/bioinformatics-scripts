@@ -28,11 +28,11 @@ def read_fasta(filename, keep_formatting=True):
                 break
             elif line.startswith(">") and not first:
                 yield header, sep.join(seq)
-                header = line[1:]
+                header = line.rstrip()[1:]
                 seq = []
             elif line.startswith(">") and first:
-                header = line[1:]
+                header = line.rstrip()[1:]
                 first = False
             else:
-                seq.append(line)
-            line = fasta.readline().rstrip()
+                seq.append(line.rstrip())
+            line = fasta.readline()
