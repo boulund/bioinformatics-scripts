@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 # Fredrik Boulund 2015
 # Print sequence lengths and headers
 
@@ -38,7 +38,7 @@ def read_fasta(filename, keep_formatting=True):
         else:
             sep = ""
         first = True
-        seqlen = []
+        seqlen = 0
         header = ""
         while fasta:
             if line == "": #EOF
@@ -46,13 +46,13 @@ def read_fasta(filename, keep_formatting=True):
                 break
             elif line.startswith(">") and not first:
                 yield seqlen, header
-                header = line.rsplit()[1:]
+                header = line.split()
                 seqlen = 0
             elif line.startswith(">") and first:
-                header = line.rsplit()[1:]
+                header = line.split()
                 first = False
             else:
-                seqlen += len(line.rsplit())
+                seqlen += len(line.rstrip())
             line = fasta.readline()
 
 
@@ -65,4 +65,4 @@ if __name__ == "__main__":
 
     seqinfo.sort(key=lambda x: x[0])
     for length, header in seqinfo:
-        print "{:<10} {}".format(length, header)
+        print "{}\t{}\t{}".format(length, header[0][1:], " ".join(header[1:]))
