@@ -68,7 +68,10 @@ def parse_blacklist(blacklist_filename):
     blacklist = set()
     with open(blacklist_filename) as f:
         for line in f:
-            blacklist.add(line.strip()[1:])
+            if line.startswith(">"):
+                blacklist.add(line.strip()[1:])
+            else:
+                blacklist.add(line.strip())
     return blacklist
 
 
