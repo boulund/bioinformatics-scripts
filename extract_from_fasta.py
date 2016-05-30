@@ -31,6 +31,9 @@ def parse_args(argv):
     parser.add_argument("-R", "--regex-file", metavar="FILE", dest="regex_file",
             default="",
             help="Extract sequences with header matching any of multiple regexes on separate lines in FILE.")
+    parser.add_argument("-b", "--blacklist", metavar="FILE", dest="blacklist",
+            default="",
+            help="Do not write sequences included in the blacklist FILE. One FASTA header per line.")
 
     if len(argv)<2:
         parser.print_help()
@@ -40,28 +43,48 @@ def parse_args(argv):
     return options
 
 
-def extract_from_fasta(fastafile, maxlength=0, minlength=0, regexes=""):
+def extract_from_fasta(fastafile, maxlength=0, minlength=0, regexes="", blacklist=""):
     """Extract sequences from FASTA.
 
     Will write to STDOUT if outfile evaluates to False.
     """
 
     for header, seq in read_fasta(fastafile):
+        if blacklist:
+            if header in blacklist:
+                continue
         if regexes:
-            if not any((re.search(rex, header) for rex in compiled_regexes)):
+            if not any((re.search(rex, header) for rex in regexes)):
                 continue
         seqlen = len(seq)
         if seqlen >= minlength and seqlen <= maxlength:
             yield (">"+header, seq)
 
 
-if __name__ == "__main__":
-    options = parse_args(argv)
+def parse_blacklist(blacklist_filename):
+    """
+    Parse blacklist into set.
+    """
+    blacklist = set()
+    with open(blacklist_filename) as f:
+        for line in f:
+            blacklist.add(line.strip()[1:])
+    return blacklist
 
+
+def main(options):
+    """
+    Main function.
+    """
     if not options.maxlength:
         maxlength = maxint
     else:
         maxlength = options.maxlength
+
+    if options.blacklist:
+        blacklist = parse_blacklist(options.blacklist)
+    else:
+        blacklist = set()
 
     if options.regex:
         compiled_regexes = [re.compile(options.regex)]
@@ -71,7 +94,9 @@ if __name__ == "__main__":
     else:
         compiled_regexes = ""
 
-    extraction_generators = (extract_from_fasta(filename, maxlength, options.minlength, compiled_regexes) for filename in options.FASTA)
+    extraction_generators = (extract_from_fasta(filename, maxlength=maxlength,
+            minlength=options.minlength, regexes=compiled_regexes,
+            blacklist=blacklist) for filename in options.FASTA)
 
     if options.outfile:
         with open(options.outfile, 'w') as outfile:
@@ -82,3 +107,9 @@ if __name__ == "__main__":
         for extraction_generator in extraction_generators:
             for seq in extraction_generator:
                 print '\n'.join(seq)
+
+
+if __name__ == "__main__":
+    options = parse_args(argv)
+    main(options)
+
