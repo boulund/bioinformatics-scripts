@@ -65,7 +65,7 @@ def parse_attributes(text):
                 exit(1)
             attributes[attrib] = value.replace('"', '')
         if line.startswith("Accession"):
-            accession = line.split(":")[1].strip()
+            accession = line.split(":")[1].split("\t")[0].strip()
     attribs = [("Description", desc),
                ("Identifiers", identifiers),
                ("Organism", organism),
