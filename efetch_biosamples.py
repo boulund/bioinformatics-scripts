@@ -24,6 +24,9 @@ def parse_args():
     parser.add_argument("-o", "--output", dest="output",
             default="biosamples_data.txt",
             help="Output filename (tab separated text).")
+    parser.add_argument("-d", "--dump-file", metavar="FILE", dest="dumpfile",
+            default=False,
+            help="Dump all the retrieved data to a text file.")
 
     if len(argv) < 2:
         print(help_text)
@@ -119,19 +122,34 @@ def write_output(biosamples, outfilename, attribute_keys=None):
                     outfile.write("-\t")
             outfile.write("\n")
 
+def write_dump(raw_data, dumpfile):
+    """
+    Write complete data dump.
+    """
+    with open(dumpfile, 'w') as outfile:
+        for biosample in raw_data:
+            outfile.write(biosample+"\n")
 
-def main(biosamples_file, outputfile, attribute_keys):
+
+def main(biosamples_file, outputfile, attribute_keys, dumpfile=False):
     """
     Main function.
     """
     biosamples = []
+    raw_data = []
     for biosample in parse_biosamples(biosamples_file):
         biosample_info = efetch_biosample(biosample)
         if biosample_info:
             biosamples.append(parse_attributes(biosample_info))
+            raw_data.append(biosample_info)
     write_output(biosamples, outputfile, attribute_keys=attribute_keys)
+    if dumpfile:
+        write_dump(raw_data, dumpfile)
 
 
 if __name__ == "__main__":
     options = parse_args()
-    main(options.BIOSAMPLES, options.output, options.attributes)
+    main(options.BIOSAMPLES, 
+            options.output, 
+            options.attributes, 
+            options.dumpfile)
