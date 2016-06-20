@@ -17,7 +17,7 @@ def parse_args(argv):
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument("FASTA", 
             help="FASTA file to sample from.")
-    parser.add_argument("-n", metavar="N", required=True, type=int,
+    parser.add_argument("-n", metavar="N", required=True, type=int, dest="N",
             help="Number of sequences to sample from FASTA file [%(default)s].")
     parser.add_argument("--maxlength", metavar="M", type=int,
             default=0,
