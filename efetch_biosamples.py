@@ -100,6 +100,7 @@ def write_output(biosamples, outfilename, attribute_keys=None):
     """
     Writes BioSample attributes to tab separated text file.
     """
+    print("Writing downloaded data to", outfilename)
 
     if attribute_keys is None:
         keys = ["isolation source", 
@@ -130,6 +131,7 @@ def write_dump(raw_data, dumpfile):
     """
     Write complete data dump.
     """
+    print("Writing data dump to", dumpfile)
     with open(dumpfile, 'w') as outfile:
         for biosample in raw_data:
             outfile.write(biosample+"\n")
