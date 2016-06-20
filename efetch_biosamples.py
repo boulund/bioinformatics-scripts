@@ -23,8 +23,8 @@ def parse_args():
             multiple times). Enclose attributes in quotation marks!""")
     parser.add_argument("-o", "--output", dest="output",
             default="biosamples_data.txt",
-            help="Output filename (tab separated text).")
-    parser.add_argument("-d", "--dump-file", metavar="FILE", dest="dumpfile",
+            help="Output filename (tab separated text) [default=%(default)s].")
+    parser.add_argument("-d", "--dump-file", metavar="FILENAME", dest="dumpfile",
             default=False,
             help="Dump all the retrieved data to a text file.")
 
