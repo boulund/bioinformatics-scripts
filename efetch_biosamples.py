@@ -141,11 +141,14 @@ def main(biosamples_file, outputfile, attribute_keys, dumpfile=False):
     """
     biosamples = []
     raw_data = []
-    for biosample in parse_biosamples(biosamples_file):
+    print("Fetching BioSample data...")
+    for i, biosample in enumerate(parse_biosamples(biosamples_file), start=1):
         biosample_info = efetch_biosample(biosample)
         if biosample_info:
             biosamples.append(parse_attributes(biosample_info))
             raw_data.append(biosample_info)
+        if i % 10 == 0:
+            print("Fetched data for {} BioSamples...".format(i))
     write_output(biosamples, outputfile, attribute_keys=attribute_keys)
     if dumpfile:
         write_dump(raw_data, dumpfile)
