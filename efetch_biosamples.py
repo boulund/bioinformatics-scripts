@@ -29,7 +29,7 @@ def parse_args():
             help="Dump all the retrieved data to a text file.")
 
     if len(argv) < 2:
-        print(help_text)
+        parser.print_help()
         exit()
 
     return parser.parse_args()
