@@ -58,7 +58,11 @@ def parse_attributes(text):
     accession = ""
     for line in lines[4:]:
         if line.strip().startswith("/"):
-            attrib, value = line.strip("/ ").split("=")
+            try:
+                attrib, value = line.strip("/ ").split("=", 1)
+            except ValueError:
+                print("ERROR parsing attribute:", line)
+                exit(1)
             attributes[attrib] = value.replace('"', '')
         if line.startswith("Accession"):
             accession = line.split(":")[1].strip()
