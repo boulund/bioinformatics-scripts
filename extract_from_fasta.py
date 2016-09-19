@@ -34,6 +34,9 @@ def parse_args(argv):
     parser.add_argument("-b", "--blacklist", metavar="FILE", dest="blacklist",
             default="",
             help="Do not write sequences included in the blacklist FILE. One FASTA header per line.")
+    parser.add_argument("-v", "--invert", action="store_true", dest="invert",
+            default=False,
+            help="Invert sequence selection, i.e. write only sequences that DO NOT match criteria [%(default)s]")
 
     if len(argv)<2:
         parser.print_help()
@@ -43,22 +46,32 @@ def parse_args(argv):
     return options
 
 
-def extract_from_fasta(fastafile, maxlength=0, minlength=0, regexes="", blacklist=""):
-    """Extract sequences from FASTA.
-
-    Will write to STDOUT if outfile evaluates to False.
+def extract_from_fasta(fastafile, maxlength=0, minlength=0, regexes="", blacklist="", invert=False):
+    """
+    Extract sequences from FASTA.
     """
 
     for header, seq in read_fasta(fastafile):
-        if blacklist:
-            if header in blacklist:
-                continue
-        if regexes:
-            if not any((re.search(rex, header) for rex in regexes)):
-                continue
-        seqlen = len(seq)
-        if seqlen >= minlength and seqlen <= maxlength:
-            yield (">"+header, seq)
+        if invert:
+            if blacklist:
+                if header in blacklist:
+                    continue
+            if regexes:
+                if any((re.search(rex, header) for rex in regexes)):
+                    continue
+            seqlen = len(seq)
+            if minlength <= seqlen <= maxlength:
+                yield (">"+header, seq)
+        else:
+            if blacklist:
+                if header not in blacklist:
+                    continue
+            if regexes:
+                if not any((re.search(rex, header) for rex in regexes)):
+                    continue
+            seqlen = len(seq)
+            if minlength >= seqlen or seqlen >= maxlength:
+                yield (">"+header, seq)
 
 
 def parse_blacklist(blacklist_filename):
@@ -97,9 +110,12 @@ def main(options):
     else:
         compiled_regexes = ""
 
-    extraction_generators = (extract_from_fasta(filename, maxlength=maxlength,
-            minlength=options.minlength, regexes=compiled_regexes,
-            blacklist=blacklist) for filename in options.FASTA)
+    extraction_generators = (extract_from_fasta(filename, 
+                                                maxlength=maxlength,
+                                                minlength=options.minlength, 
+                                                regexes=compiled_regexes,
+                                                blacklist=blacklist,
+                                                invert=options.invert) for filename in options.FASTA)
 
     if options.outfile:
         with open(options.outfile, 'w') as outfile:
@@ -115,4 +131,5 @@ def main(options):
 if __name__ == "__main__":
     options = parse_args(argv)
     main(options)
+
 
