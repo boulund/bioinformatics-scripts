@@ -60,7 +60,13 @@ def extract_from_fasta(fastafile, maxlength=0, minlength=0, regexes="", blacklis
                 if any((re.search(rex, header) for rex in regexes)):
                     continue
             seqlen = len(seq)
-            if minlength <= seqlen <= maxlength:
+            if maxlength == maxint:
+                if minlength > seqlen:
+                    yield (">"+header, seq)
+            if minlength == 0:
+                if maxlength < seqlen:
+                    yield (">"+header, seq)
+            if seqlen < minlength or seqlen > maxlength:
                 yield (">"+header, seq)
         else:
             if blacklist:
@@ -70,7 +76,7 @@ def extract_from_fasta(fastafile, maxlength=0, minlength=0, regexes="", blacklis
                 if not any((re.search(rex, header) for rex in regexes)):
                     continue
             seqlen = len(seq)
-            if minlength >= seqlen or seqlen >= maxlength:
+            if minlength <= seqlen <= maxlength:
                 yield (">"+header, seq)
 
 
