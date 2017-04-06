@@ -54,7 +54,7 @@ def extract_from_fasta(fastafile, maxlength=0, minlength=0, regexes="", blacklis
     for header, seq in read_fasta(fastafile):
         if invert:
             if blacklist:
-                if header in blacklist:
+                if header not in blacklist:
                     continue
             if regexes:
                 if any((re.search(rex, header) for rex in regexes)):
@@ -70,7 +70,7 @@ def extract_from_fasta(fastafile, maxlength=0, minlength=0, regexes="", blacklis
                 yield (">"+header, seq)
         else:
             if blacklist:
-                if header not in blacklist:
+                if header in blacklist:
                     continue
             if regexes:
                 if not any((re.search(rex, header) for rex in regexes)):
