@@ -23,16 +23,17 @@ def parse_args():
     return parser.parse_args()
 
 
-def download_file_from_google_drive(id, destination):
+def download_file_from_google_drive(gdrive_id, destination):
     def get_confirm_token(response):
         for key, value in response.cookies.items():
-            if key.startswith('download_warning'):
+            if key.startswith("download_warning"):
                 return value
         return None
 
     def save_response_content(response, destination):
         CHUNK_SIZE = 32768
         with open(destination, "wb") as f:
+            print("Downloading to '", destination, "'")
             for chunk in response.iter_content(CHUNK_SIZE):
                 if chunk: # filter out keep-alive new chunks
                     f.write(chunk)
@@ -40,14 +41,14 @@ def download_file_from_google_drive(id, destination):
     base_URL = "https://docs.google.com/uc?export=download"
 
     session = requests.Session()
-    response = session.get(base_URL, params = { 'id' : id }, stream = True)
+    response = session.get(base_URL, params={"id": gdrive_id}, stream=True)
     token = get_confirm_token(response)
 
     if token:
-        params = { 'id' : id, 'confirm' : token }
-        response = session.get(base_URL, params = params, stream = True)
+        params = {"id": gdrive_id, "confirm": token}
+        response = session.get(base_URL, params=params, stream=True)
 
-    save_response_content(response, destination)    
+    save_response_content(response, destination)
 
 
 if __name__ == "__main__":
