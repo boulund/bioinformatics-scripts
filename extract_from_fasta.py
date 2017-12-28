@@ -17,13 +17,16 @@ def parse_args(argv):
     parser.add_argument("FASTA", nargs="+",
             help="FASTA file(s) to sample from.")
     parser.add_argument("-q", "--fastq", action="store_true",
-            help="Input file is FASTQ")
+            help="Input file is FASTQ.")
     parser.add_argument("-M", "--maxlength", metavar="M", type=int,
             default=0,
             help="Maximum length of sequences to extract, 0 means no limit [%(default)s]")
     parser.add_argument("-m", "--minlength", metavar="m", type=int,
             default=0,
             help="Minimum length of sequences to extract, 0 means no limit [%(default)s].")
+    parser.add_argument("-n", metavar="N",
+            default=0,
+            help="Stop after processing N sequences, 0 means no limit [%(default)s].")
     parser.add_argument("-o", "--outfile", metavar="FILE", dest="outfile",
             default="",
             help="Write output to FILE instead of STDOUT.")
@@ -48,12 +51,13 @@ def parse_args(argv):
     return options
 
 
-def extract_from_fasta(parser, maxlength=0, minlength=0, regexes="", blacklist="", invert=False):
+def extract_from_fasta(parser, maxlength=0, minlength=0, regexes="", blacklist="", invert=False, n_seqs=0):
     """
     Extract sequences from FASTA.
     """
 
-    for header, seq in parser:
+    for seq_count, header_seq  in enumerate(parser, start=1):
+        header, seq = header_seq
         if invert:
             if blacklist:
                 if header not in blacklist:
@@ -80,6 +84,9 @@ def extract_from_fasta(parser, maxlength=0, minlength=0, regexes="", blacklist="
             seqlen = len(seq)
             if minlength <= seqlen <= maxlength:
                 yield (">"+header, seq)
+        if seq_count > n_seqs:
+            raise StopIteration
+
 
 
 def parse_blacklist(blacklist_filename):
@@ -123,12 +130,18 @@ def main(options):
     else:
         parser = read_fasta
 
+    if options.n:
+        n_seqs = int(options.n)
+    else:
+        n_seqs = maxint
+
     extraction_generators = (extract_from_fasta(parser(filename), 
                                                 maxlength=maxlength,
                                                 minlength=options.minlength, 
                                                 regexes=compiled_regexes,
                                                 blacklist=blacklist,
-                                                invert=options.invert) for filename in options.FASTA)
+                                                invert=options.invert,
+                                                n_seqs=n_seqs) for filename in options.FASTA)
 
     if options.outfile:
         with open(options.outfile, 'w') as outfile:
