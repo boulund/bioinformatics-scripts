@@ -2,7 +2,7 @@
 # Fredrik Boulund 2015
 # Extract sequences from a FASTA file 
 
-from read_fasta import read_fasta
+from read_fasta import read_fasta, read_fastq
 from sys import argv, exit, maxint
 import argparse
 import re
@@ -16,6 +16,8 @@ def parse_args(argv):
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument("FASTA", nargs="+",
             help="FASTA file(s) to sample from.")
+    parser.add_argument("-q", "--fastq", action="store_true",
+            help="Input file is FASTQ")
     parser.add_argument("-M", "--maxlength", metavar="M", type=int,
             default=0,
             help="Maximum length of sequences to extract, 0 means no limit [%(default)s]")
@@ -46,12 +48,12 @@ def parse_args(argv):
     return options
 
 
-def extract_from_fasta(fastafile, maxlength=0, minlength=0, regexes="", blacklist="", invert=False):
+def extract_from_fasta(parser, maxlength=0, minlength=0, regexes="", blacklist="", invert=False):
     """
     Extract sequences from FASTA.
     """
 
-    for header, seq in read_fasta(fastafile):
+    for header, seq in parser:
         if invert:
             if blacklist:
                 if header not in blacklist:
@@ -116,7 +118,12 @@ def main(options):
     else:
         compiled_regexes = ""
 
-    extraction_generators = (extract_from_fasta(filename, 
+    if options.fastq:
+        parser = read_fastq
+    else:
+        parser = read_fasta
+
+    extraction_generators = (extract_from_fasta(parser(filename), 
                                                 maxlength=maxlength,
                                                 minlength=options.minlength, 
                                                 regexes=compiled_regexes,
